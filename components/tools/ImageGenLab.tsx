@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateImage } from '../../services/geminiService';
 import { Loader2, Image as ImageIcon, Wand2, AlertTriangle, Sparkles, BookOpen, Save, Search, X, Tag, Filter, Trash2 } from 'lucide-react';
 
@@ -9,6 +9,10 @@ interface PromptEntry {
   style: string;
   category: string;
   isCustom?: boolean;
+}
+
+interface ImageGenLabProps {
+  initialAction?: 'openLibrary';
 }
 
 const DEFAULT_LIBRARY: PromptEntry[] = [
@@ -56,7 +60,7 @@ const DEFAULT_LIBRARY: PromptEntry[] = [
   }
 ];
 
-export const ImageGenLab: React.FC = () => {
+export const ImageGenLab: React.FC<ImageGenLabProps> = ({ initialAction }) => {
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState('Cinematic');
   const [loading, setLoading] = useState(false);
@@ -68,6 +72,13 @@ export const ImageGenLab: React.FC = () => {
   const [libraryPrompts, setLibraryPrompts] = useState<PromptEntry[]>(DEFAULT_LIBRARY);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Handle Initial Action (Deep Linking)
+  useEffect(() => {
+    if (initialAction === 'openLibrary') {
+        setIsLibraryOpen(true);
+    }
+  }, [initialAction]);
 
   // Derived Library Data
   const categories = ['All', 'Custom', ...Array.from(new Set(DEFAULT_LIBRARY.map(p => p.category)))];
@@ -127,41 +138,41 @@ export const ImageGenLab: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full max-w-6xl mx-auto relative">
+    <div className="flex flex-col h-full max-w-6xl mx-auto relative animate-slide-up">
       <div className="mb-8">
-        <h2 className="text-3xl font-display font-bold text-[#1A1A1A] mb-2">Visual Prompt Lab</h2>
-        <p className="text-[#7E7E7E]">Experiment with styles and adjectives to master the text-to-image pipeline.</p>
+        <h2 className="text-3xl font-display font-bold text-[#0F172A] mb-2">Visual Prompt Lab</h2>
+        <p className="text-[#64748B]">Experiment with styles and adjectives to master the text-to-image pipeline.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 flex-1">
         {/* Controls */}
         <div className="w-full lg:w-[400px] space-y-6 flex-shrink-0">
-          <div className="bg-white p-8 rounded-[24px] shadow-[0px_1px_3px_rgba(0,0,0,0.06),0px_4px_10px_rgba(0,0,0,0.04)] border border-black/5">
+          <div className="bg-white p-8 rounded-[24px] shadow-[0px_1px_3px_rgba(0,0,0,0.06),0px_4px_10px_rgba(0,0,0,0.04)] border border-slate-100">
             <div className="flex items-center justify-between mb-4">
                  <div className="flex items-center">
-                    <div className="p-2 bg-[#6C4CF4]/10 rounded-lg mr-3">
-                        <Sparkles className="text-[#6C4CF4] w-4 h-4" />
+                    <div className="p-2 bg-[#2563EB]/10 rounded-lg mr-3">
+                        <Sparkles className="text-[#2563EB] w-4 h-4" />
                     </div>
-                    <h3 className="font-display font-bold text-[#1A1A1A]">Configuration</h3>
+                    <h3 className="font-display font-bold text-[#0F172A]">Configuration</h3>
                  </div>
                  <button 
                     onClick={() => setIsLibraryOpen(true)}
-                    className="flex items-center text-xs font-bold text-[#6C4CF4] bg-[#6C4CF4]/5 px-3 py-2 rounded-full hover:bg-[#6C4CF4]/10 transition-colors"
+                    className="flex items-center text-xs font-bold text-[#2563EB] bg-[#2563EB]/5 px-3 py-2 rounded-full hover:bg-[#2563EB]/10 transition-colors"
                  >
                     <BookOpen size={14} className="mr-1.5" /> Library
                  </button>
             </div>
             
-            <label className="block text-xs font-bold text-[#7E7E7E] uppercase tracking-wider mb-2">Visual Description</label>
+            <label className="block text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Visual Description</label>
             <textarea 
-              className="w-full p-4 bg-[#F7F8FA] border border-transparent rounded-2xl focus:bg-white focus:border-[#6C4CF4]/50 focus:ring-4 focus:ring-[#6C4CF4]/10 outline-none transition-all h-40 resize-none font-medium text-[#1A1A1A] placeholder:text-gray-400 mb-2"
+              className="w-full p-4 bg-[#F8FAFC] border border-transparent rounded-2xl focus:bg-white focus:border-[#2563EB]/50 focus:ring-4 focus:ring-[#2563EB]/10 outline-none transition-all h-40 resize-none font-medium text-[#0F172A] placeholder:text-gray-400 mb-2"
               placeholder="A futuristic city with flying cars at sunset, neon lights, cyberpunk aesthetic..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
             <p className="text-xs text-[#9CA3AF] mb-6">Tip: Be specific about lighting, camera angle, and mood.</p>
 
-            <label className="block text-xs font-bold text-[#7E7E7E] uppercase tracking-wider mb-2">Art Style</label>
+            <label className="block text-xs font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Art Style</label>
             <div className="grid grid-cols-2 gap-2 mb-8">
               {['Cinematic', 'Photorealistic', '3D Render', 'Oil Painting', 'Cyberpunk', 'Minimalist'].map(s => (
                 <button
@@ -169,8 +180,8 @@ export const ImageGenLab: React.FC = () => {
                   onClick={() => setStyle(s)}
                   className={`px-3 py-3 rounded-xl text-sm font-semibold transition-all border ${
                     style === s 
-                    ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-md' 
-                    : 'bg-white text-[#4A4A4A] border-gray-100 hover:border-gray-300 hover:bg-[#F9FAFB]'
+                    ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md transform scale-[1.02]' 
+                    : 'bg-white text-[#475569] border-slate-100 hover:border-slate-300 hover:bg-[#F8FAFC]'
                   }`}
                 >
                   {s}
@@ -182,14 +193,14 @@ export const ImageGenLab: React.FC = () => {
                 <button
                     onClick={handleGenerate}
                     disabled={loading || !prompt}
-                    className="flex-1 bg-gradient-to-r from-[#6C4CF4] to-[#C84FF1] hover:scale-[1.02] text-white font-bold py-4 rounded-full transition-all shadow-[0px_8px_20px_rgba(108,76,244,0.3)] flex items-center justify-center disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
+                    className="flex-1 bg-gradient-to-r from-[#2563EB] to-[#06B6D4] hover:scale-[1.02] text-white font-bold py-4 rounded-full transition-all shadow-[0px_8px_20px_rgba(37,99,235,0.3)] flex items-center justify-center disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
                 >
                     {loading ? <Loader2 className="animate-spin" /> : <><Wand2 className="mr-2" size={18}/> Generate</>}
                 </button>
                 <button 
                     onClick={handleSaveToLibrary}
                     disabled={!prompt}
-                    className="p-4 rounded-full bg-[#F7F8FA] text-[#4A4A4A] hover:text-[#6C4CF4] hover:bg-[#6C4CF4]/5 border border-transparent hover:border-[#6C4CF4]/20 transition-all disabled:opacity-50"
+                    className="p-4 rounded-full bg-[#F8FAFC] text-[#475569] hover:text-[#2563EB] hover:bg-[#2563EB]/5 border border-transparent hover:border-[#2563EB]/20 transition-all disabled:opacity-50"
                     title="Save to Library"
                 >
                     <Save size={20} />
@@ -199,16 +210,16 @@ export const ImageGenLab: React.FC = () => {
         </div>
 
         {/* Preview Area */}
-        <div className="flex-1 bg-white rounded-[24px] shadow-[0px_1px_3px_rgba(0,0,0,0.06),0px_4px_10px_rgba(0,0,0,0.04)] border border-black/5 flex items-center justify-center overflow-hidden relative min-h-[500px] p-4">
-          <div className="absolute top-0 left-0 w-full h-full bg-[#F9FAFB] opacity-50 z-0"></div>
+        <div className="flex-1 bg-white rounded-[24px] shadow-[0px_1px_3px_rgba(0,0,0,0.06),0px_4px_10px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center justify-center overflow-hidden relative min-h-[500px] p-4">
+          <div className="absolute top-0 left-0 w-full h-full bg-[#F8FAFC] opacity-50 z-0"></div>
           
           {loading && (
             <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center">
                <div className="relative">
-                 <div className="w-20 h-20 rounded-full border-4 border-[#F0F0F0] border-t-[#6C4CF4] animate-spin"></div>
-                 <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#6C4CF4]" size={24} />
+                 <div className="w-20 h-20 rounded-full border-4 border-[#F1F5F9] border-t-[#2563EB] animate-spin"></div>
+                 <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#2563EB]" size={24} />
                </div>
-               <p className="mt-6 text-lg font-display font-bold text-[#1A1A1A] animate-pulse">Dreaming up your image...</p>
+               <p className="mt-6 text-lg font-display font-bold text-[#0F172A] animate-[pulse-soft_2s_infinite]">Dreaming up your image...</p>
             </div>
           )}
 
@@ -217,7 +228,7 @@ export const ImageGenLab: React.FC = () => {
                 <img 
                 src={generatedImage} 
                 alt="Generated Result" 
-                className="w-full h-full object-contain bg-[#1A1A1A]" 
+                className="w-full h-full object-contain bg-[#0F172A]" 
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-end">
                     <p className="text-white/90 text-sm font-medium line-clamp-2 w-3/4">{prompt}</p>
@@ -225,19 +236,19 @@ export const ImageGenLab: React.FC = () => {
                 </div>
             </div>
           ) : error ? (
-            <div className="text-center p-8 max-w-md z-10">
+            <div className="text-center p-8 max-w-md z-10 animate-fade-in">
                 <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <AlertTriangle className="text-red-500" size={32} />
                 </div>
-                <h3 className="font-display font-bold text-[#1A1A1A] text-lg mb-2">Generation Failed</h3>
-                <p className="text-[#7E7E7E] leading-relaxed">{error}</p>
+                <h3 className="font-display font-bold text-[#0F172A] text-lg mb-2">Generation Failed</h3>
+                <p className="text-[#64748B] leading-relaxed">{error}</p>
             </div>
           ) : (
-            <div className="text-center text-[#9CA3AF] z-10">
-              <div className="w-24 h-24 bg-[#F0F0F0] rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="text-center text-[#94A3B8] z-10">
+              <div className="w-24 h-24 bg-[#F1F5F9] rounded-full flex items-center justify-center mx-auto mb-6">
                  <ImageIcon className="opacity-40" size={40} />
               </div>
-              <h3 className="font-display font-bold text-[#1A1A1A] text-xl mb-2">Preview Canvas</h3>
+              <h3 className="font-display font-bold text-[#0F172A] text-xl mb-2">Preview Canvas</h3>
               <p className="text-sm font-medium">Your AI-generated artwork will appear here.</p>
             </div>
           )}
@@ -246,28 +257,28 @@ export const ImageGenLab: React.FC = () => {
 
       {/* Prompt Library Modal */}
       {isLibraryOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-[#1A1A1A]/30 backdrop-blur-sm" onClick={() => setIsLibraryOpen(false)} />
-            <div className="bg-white rounded-[24px] shadow-[0px_8px_30px_rgba(0,0,0,0.12)] w-full max-w-4xl max-h-[85vh] flex flex-col relative animate-fade-in border border-white/20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm transition-opacity" onClick={() => setIsLibraryOpen(false)} />
+            <div className="bg-white rounded-[24px] shadow-[0px_8px_30px_rgba(0,0,0,0.12)] w-full max-w-4xl max-h-[85vh] flex flex-col relative animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)] border border-white/20">
                 {/* Modal Header */}
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-display font-bold text-[#1A1A1A]">Prompt Library</h2>
-                        <p className="text-sm text-[#7E7E7E]">Discover effective prompts or access your saved favorites.</p>
+                        <h2 className="text-2xl font-display font-bold text-[#0F172A]">Prompt Library</h2>
+                        <p className="text-sm text-[#64748B]">Discover effective prompts or access your saved favorites.</p>
                     </div>
-                    <button onClick={() => setIsLibraryOpen(false)} className="p-2 text-[#9CA3AF] hover:text-[#1A1A1A] hover:bg-gray-100 rounded-full transition-colors">
+                    <button onClick={() => setIsLibraryOpen(false)} className="p-2 text-[#94A3B8] hover:text-[#0F172A] hover:bg-slate-100 rounded-full transition-colors">
                         <X size={24} />
                     </button>
                 </div>
 
                 {/* Filters */}
-                <div className="p-6 bg-[#F9FAFB] border-b border-gray-100 flex flex-col md:flex-row gap-4">
+                <div className="p-6 bg-[#F8FAFC] border-b border-slate-100 flex flex-col md:flex-row gap-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input 
                             type="text" 
                             placeholder="Search prompts..." 
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6C4CF4]/20 focus:border-[#6C4CF4]/50 text-sm font-medium"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 text-sm font-medium text-[#0F172A]"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -279,8 +290,8 @@ export const ImageGenLab: React.FC = () => {
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                                     selectedCategory === cat 
-                                    ? 'bg-[#1A1A1A] text-white shadow-md' 
-                                    : 'bg-white text-[#7E7E7E] border border-gray-200 hover:border-[#6C4CF4] hover:text-[#6C4CF4]'
+                                    ? 'bg-[#0F172A] text-white shadow-md' 
+                                    : 'bg-white text-[#64748B] border border-slate-200 hover:border-[#2563EB] hover:text-[#2563EB]'
                                 }`}
                             >
                                 {cat}
@@ -290,9 +301,9 @@ export const ImageGenLab: React.FC = () => {
                 </div>
 
                 {/* Content Grid */}
-                <div className="flex-1 overflow-y-auto p-6 bg-[#F7F8FA]">
+                <div className="flex-1 overflow-y-auto p-6 bg-[#F8FAFC]">
                     {filteredPrompts.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-48 text-[#9CA3AF]">
+                        <div className="flex flex-col items-center justify-center h-48 text-[#94A3B8]">
                             <Filter size={32} className="mb-3 opacity-50" />
                             <p className="font-medium">No prompts found.</p>
                         </div>
@@ -302,28 +313,28 @@ export const ImageGenLab: React.FC = () => {
                                 <button
                                     key={item.id}
                                     onClick={() => handleSelectFromLibrary(item)}
-                                    className="text-left bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-[#6C4CF4]/30 hover:-translate-y-0.5 transition-all group relative"
+                                    className="text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-[#2563EB]/30 hover:-translate-y-0.5 transition-all group relative"
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-bold text-[#1A1A1A] font-display">{item.title}</h4>
+                                        <h4 className="font-bold text-[#0F172A] font-display">{item.title}</h4>
                                         <div className="flex gap-2">
                                             {item.isCustom && (
-                                                <button 
+                                                <div 
                                                     onClick={(e) => handleDeletePrompt(item.id, e)}
-                                                    className="p-1 text-red-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                    className="p-1 text-red-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors z-10"
                                                 >
                                                     <Trash2 size={14} />
-                                                </button>
+                                                </div>
                                             )}
-                                            <span className="text-[10px] font-bold bg-[#F0F0F0] text-[#7E7E7E] px-2 py-1 rounded-md uppercase tracking-wider">
+                                            <span className="text-[10px] font-bold bg-[#F1F5F9] text-[#64748B] px-2 py-1 rounded-md uppercase tracking-wider border border-slate-200">
                                                 {item.style}
                                             </span>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-[#4A4A4A] line-clamp-3 leading-relaxed mb-3">
+                                    <p className="text-sm text-[#475569] line-clamp-3 leading-relaxed mb-3">
                                         {item.prompt}
                                     </p>
-                                    <div className="flex items-center text-xs font-bold text-[#6C4CF4] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center text-xs font-bold text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
                                         Use this prompt <Wand2 size={12} className="ml-1" />
                                     </div>
                                 </button>

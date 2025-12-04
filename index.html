@@ -11,8 +11,8 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #F9FAFB;
-        color: #1A1A1A;
+        background-color: #F8FAFC;
+        color: #0F172A;
       }
       h1, h2, h3, h4, h5, h6 {
         font-family: 'Fraunces', serif;
@@ -21,7 +21,7 @@
         font-family: 'Fraunces', serif;
       }
       
-      /* Custom Scrollbar */
+      /* Custom Scrollbar - Blue Theme */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -30,21 +30,42 @@
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: #E2E8F0;
+        background: #CBD5E1;
         border-radius: 4px;
+        transition: background 0.2s;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #CBD5E1;
+        background: #94A3B8;
       }
 
-      /* Soft Fade Animation */
+      /* Animations */
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .animate-fade-in {
-        animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+
+      @keyframes pulse-soft {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
       }
+
+      .animate-fade-in {
+        animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      
+      .animate-slide-up {
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* Stagger delays for lists */
+      .delay-100 { animation-delay: 100ms; }
+      .delay-200 { animation-delay: 200ms; }
+      .delay-300 { animation-delay: 300ms; }
     </style>
   <script type="importmap">
 {
